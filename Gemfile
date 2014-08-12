@@ -32,6 +32,8 @@ group :development do
   gem 'capistrano3-unicorn'
   gem 'capistrano-bundler'
   gem 'capistrano-rails'
+  gem 'capistrano-postgresql'
+  
 end
 
 group :production do
