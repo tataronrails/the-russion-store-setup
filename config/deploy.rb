@@ -33,6 +33,8 @@ set :ssh_options, {
 set :linked_dirs, fetch(:linked_dirs) + %w{log
                                            tmp/sockets
                                            tmp/pids}
+
+set :pg_user, 'test_app_production'
 # set :bundle_gemfile, "#{ fetch(:deploy_to) }/current/Gemfile"
 
 # Default branch is :master
