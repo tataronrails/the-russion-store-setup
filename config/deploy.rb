@@ -8,10 +8,10 @@ set :scm, :git
 set :format, :pretty
 
 set :ip_machine, '104.131.198.171'
-set :user, 'root'
+set :user, 'ubuntu'
 set :rails_env, 'production'
 set :domain, "#{ fetch(:user) }@#{ fetch(:ip_machine) }"
-set :deploy_to, "/#{ fetch(:user) }/#{ fetch(:application) }"
+set :deploy_to, "/home/#{ fetch(:user) }/#{ fetch(:application) }"
 set :use_sudo, false
 
 set :rbenv_type, :user# :system, depends on your rbenv setup
@@ -20,11 +20,19 @@ set :rbenv_prefix, "RBENV_ROOT=#{fetch(:rbenv_path)} RBENV_VERSION=#{fetch(:rben
 set :rbenv_map_bins, %w{rake gem bundle ruby rails}
 set :rbenv_roles, :all # default value
 
+set :unicorn_config_path, "#{ fetch(:deploy_to) }/current/config/unicorn.rb"
+set :unicorn_pid, "#{fetch(:deploy_to)}/shared/tmp/pids/unicorn.pid"
+
+set :tmp_dir, "#{fetch(:deploy_to)}/shared/tmp"
+
 set :ssh_options, {
     user: 'root' ,
-    password: 'D07iB83A' ,
     forward_agent: false,
-    auth_methods: %w(password) }
+    auth_methods: %w(publickey password) }
+
+set :linked_dirs, fetch(:linked_dirs) + %w{log
+                                           tmp/sockets
+                                           tmp/pids}
 
 # Default branch is :master
 # ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }.call
@@ -36,8 +44,7 @@ set :ssh_options, {
 # set :scm, :git
 
 # Default value for :format is :pretty
-# set :format, :pretty
-
+set :format, :pretty
 # Default value for :log_level is :debug
 # set :log_level, :debug
 
