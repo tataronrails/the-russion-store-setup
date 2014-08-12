@@ -85,4 +85,9 @@ namespace :deploy do
     end
   end
 
+after 'deploy', 'deploy:restart'
+  task :restart do
+    invoke 'unicorn:restart'
+  end
+
 end
