@@ -1,0 +1,72 @@
+worker_processes 1;
+user root root;
+
+pid /tmp/nginx.pid;
+error_log /var/log/nginx/error.log;
+
+events {
+  worker_connections 1024;
+  accept_mutex off;
+}
+
+http {
+  include mime.types;
+  default_type application/octet-stream;
+  access_log /var/log/nginx/access.log combined;
+  sendfile on;
+  tcp_nopush on;
+  tcp_nodelay off;
+  gzip on;
+
+  map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+  }
+
+  upstream myapp_server {
+    server unix:/home/ubuntu/test_app/shared/tmp/sockets/unicorn.sock fail_timeout=0;
+  }
+
+  server {
+    listen 80 default deferred;
+    client_max_body_size 1G;
+    server_name localhost.;
+    keepalive_timeout 5;
+    root /home/ubuntu/test_app/current/public;
+
+    try_files $uri/index.html $uri.html $uri @myapp;
+
+    location @myapp {
+      if ($request_method = OPTIONS ) {
+        add_header Access-Control-Allow-Origin "*";
+        add_header Access-Control-Allow-Methods "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS";
+        add_header Access-Control-Allow-Headers "Accept, Content-Type, Auth-Token, Profile-Id, X-HTTP-Method-Override";
+        add_header Access-Control-Allow-Credentials "true";
+        add_header Content-Length 0;
+        add_header Content-Type text/plain;
+        return 200;
+      }
+      proxy_pass http://myapp_server;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header Host $http_host;
+      proxy_pass_request_headers on;
+      proxy_pass_header auth_token;
+      proxy_redirect off;
+      proxy_read_timeout 3600;
+      proxy_send_timeout 3600;
+    }
+
+    location ~ ^/(assets)/  {
+      root /home/ubuntu/test_app/current/public;
+      gzip_static on; # to serve pre-gzipped version
+      expires max;
+      add_header Cache-Control public;
+    }
+
+
+    error_page 500 502 503 504 /500.html;
+    location = /500.html {
+      root /home/ubuntu/test_app/current/public;
+    }
+  }
+}
