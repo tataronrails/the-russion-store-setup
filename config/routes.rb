@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
-  get '/', to: redirect('/test.html')
+  resources :posts
+
+  get '/static_file', to: redirect('/test.html')
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 

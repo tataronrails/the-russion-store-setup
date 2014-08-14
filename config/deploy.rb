@@ -40,12 +40,9 @@ set :linked_dirs, fetch(:linked_dirs) + %w{log
 set :pg_user, 'test_app_production'
 set :format, :pretty
 
-namespace :deploy do
-  after 'deploy', 'deploy:restart_unicorn'
-
-  desc 'Restart unicorn'
-  task :restart_unicorn do
+after 'deploy', 'unicorn:restart'
+namespace :unicorn do
+  task :restart do
     invoke 'unicorn:restart'
   end
-
 end
