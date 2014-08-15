@@ -38,11 +38,21 @@ set :linked_dirs, fetch(:linked_dirs) + %w{log
                                            tmp/pids}
 set :pg_user, 'test_app_production'
 set :format, :pretty
-set :nginx_template, "#{ fetch(:deploy_to) }/current/current/nginx.conf.erb"
+set :nginx_template, "nginx.conf"
 
 after 'deploy', 'unicorn:restart'
 namespace :unicorn do
   task :restart do
     invoke 'unicorn:restart'
+  end
+end
+
+namespace :nginx do
+  task :update_conf do
+    on roles(:app) do
+      execute :sudo, :service, :nginx, :stop
+      execute :sudo, :cp, "#{ fetch(:deploy_to) }/current/#{ fetch(:nginx_template) }", '/etc/nginx/nginx.conf'
+      execute :sudo, :service, :nginx, :start
+    end
   end
 end
