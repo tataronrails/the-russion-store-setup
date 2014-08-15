@@ -36,9 +36,9 @@ set :ssh_options, {
 set :linked_dirs, fetch(:linked_dirs) + %w{log
                                            tmp/sockets
                                            tmp/pids}
-
 set :pg_user, 'test_app_production'
 set :format, :pretty
+set :nginx_template, "#{ fetch(:deploy_to) }/current/current/nginx.conf.erb"
 
 after 'deploy', 'unicorn:restart'
 namespace :unicorn do
